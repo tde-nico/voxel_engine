@@ -8,7 +8,7 @@ class Textures:
 		self.ctx = app.ctx
 
 		# load texture
-		self.texture_0 = self.load('water.png')
+		self.texture_0 = self.load('filled_frame.png')
 
 		# assign texture unit
 		self.texture_0.use(location=0)
