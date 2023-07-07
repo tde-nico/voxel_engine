@@ -8,6 +8,9 @@ WIDTH = 1600
 HEIGHT = 900
 WIN_RES = glm.vec2(WIDTH, HEIGHT)
 
+# ray casting
+MAX_RAY_DIST = 6
+
 # chunk
 CHUNK_SIZE = 32
 H_CHUNK_SIZE = CHUNK_SIZE // 2

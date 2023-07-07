@@ -6,11 +6,10 @@ class BaseMesh:
 		self.ctx = None
 		self.program = None
 		self.vbo_format = None
-		self.attrs = None
+		self.attrs: tuple[str, ...] = None
 		self.vao = None
 
-	def get_vertex_data(self) -> np.array:
-		pass
+	def get_vertex_data(self) -> np.array: ...
 
 	def get_vao(self):
 		vertex_data = self.get_vertex_data()
