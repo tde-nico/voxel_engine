@@ -1,5 +1,6 @@
 from numba import njit
 import numpy as np
+import pygame as pg
 import glm
 import math
 
@@ -11,6 +12,8 @@ NUM_SAMPLES = 1  # antialiasing
 # resolution
 WIDTH, HEIGHT = 1280, 720
 WIN_RES = glm.vec2(WIDTH, HEIGHT)
+MONITOR_SIZE = WIN_RES
+FULLSCREEN = False
 
 # world generation
 SEED = 16
