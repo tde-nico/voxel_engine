@@ -12,7 +12,7 @@ class Player(Camera):
 		self.keyboard_control()
 		self.mouse_control()
 		super().update()
-	
+
 	def handle_event(self, event):
 		if event.type == pg.MOUSEBUTTONDOWN:
 			voxel_handler = self.app.scene.world.voxel_handler
@@ -43,4 +43,3 @@ class Player(Camera):
 			self.move_up(vel)
 		if key_state[pg.K_e]:
 			self.move_down(vel)
-

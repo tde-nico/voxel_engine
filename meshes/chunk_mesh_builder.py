@@ -3,30 +3,6 @@ from numba import uint8
 
 
 @njit
-def pack_data(x, y, z, voxel_id, face_id, ao_id, flip_id):
-	# bits -> x: 6, y: 6, z: 6, voxel_id: 8, face_id: 3, ao_id: 2, flip_id: 1
-	a, b, c, d, e, f, g = x, y, z, voxel_id, face_id, ao_id, flip_id
-	
-	b_bit, c_bit, d_bit, e_bit, f_bit, g_bit = 6, 6, 8, 3, 2, 1
-	fg_bit = f_bit + g_bit
-	efg_bit = e_bit + fg_bit
-	defg_bit = d_bit + efg_bit
-	cdefg_bit = c_bit + defg_bit
-	bcdefg_bit = b_bit + cdefg_bit
-
-	packed_data = (
-		a << bcdefg_bit |
-		b << cdefg_bit |
-		c << defg_bit |
-		d << efg_bit |
-		e << fg_bit |
-		f << g_bit |
-		g
-	)
-	return packed_data
-
-
-@njit
 def get_ao(local_pos, world_pos, world_voxels, plane):
 	x, y, z = local_pos
 	wx, wy, wz = world_pos
@@ -63,6 +39,30 @@ def get_ao(local_pos, world_pos, world_voxels, plane):
 
 	ao = (a + b + c), (g + h + a), (e + f + g), (c + d + e)
 	return ao
+
+
+@njit
+def pack_data(x, y, z, voxel_id, face_id, ao_id, flip_id):
+	# bits -> x: 6  y: 6  z: 6  voxel_id: 8  face_id: 3  ao_id: 2  flip_id: 1
+	a, b, c, d, e, f, g = x, y, z, voxel_id, face_id, ao_id, flip_id
+
+	b_bit, c_bit, d_bit, e_bit, f_bit, g_bit = 6, 6, 8, 3, 2, 1
+	fg_bit = f_bit + g_bit
+	efg_bit = e_bit + fg_bit
+	defg_bit = d_bit + efg_bit
+	cdefg_bit = c_bit + defg_bit
+	bcdefg_bit = b_bit + cdefg_bit
+
+	packed_data = (
+		a << bcdefg_bit |
+		b << cdefg_bit |
+		c << defg_bit |
+		d << efg_bit |
+		e << fg_bit |
+		f << g_bit |
+		g
+	)
+	return packed_data
 
 
 @njit
@@ -110,6 +110,7 @@ def build_chunk_mesh(chunk_voxels, format_size, chunk_pos, world_voxels):
 		for y in range(CHUNK_SIZE):
 			for z in range(CHUNK_SIZE):
 				voxel_id = chunk_voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y]
+
 				if not voxel_id:
 					continue
 
@@ -121,9 +122,11 @@ def build_chunk_mesh(chunk_voxels, format_size, chunk_pos, world_voxels):
 
 				# top face
 				if is_void((x, y + 1, z), (wx, wy + 1, wz), world_voxels):
+					# get ao values
 					ao = get_ao((x, y + 1, z), (wx, wy + 1, wz), world_voxels, plane='Y')
 					flip_id = ao[1] + ao[3] > ao[0] + ao[2]
-					
+
+					# format: x, y, z, voxel_id, face_id, ao_id, flip_id
 					v0 = pack_data(x    , y + 1, z    , voxel_id, 0, ao[0], flip_id)
 					v1 = pack_data(x + 1, y + 1, z    , voxel_id, 0, ao[1], flip_id)
 					v2 = pack_data(x + 1, y + 1, z + 1, voxel_id, 0, ao[2], flip_id)
@@ -133,7 +136,6 @@ def build_chunk_mesh(chunk_voxels, format_size, chunk_pos, world_voxels):
 						index = add_data(vertex_data, index, v1, v0, v3, v1, v3, v2)
 					else:
 						index = add_data(vertex_data, index, v0, v3, v2, v0, v2, v1)
-
 
 				# bottom face
 				if is_void((x, y - 1, z), (wx, wy - 1, wz), world_voxels):
@@ -211,4 +213,3 @@ def build_chunk_mesh(chunk_voxels, format_size, chunk_pos, world_voxels):
 						index = add_data(vertex_data, index, v0, v2, v1, v0, v3, v2)
 
 	return vertex_data[:index + 1]
-
